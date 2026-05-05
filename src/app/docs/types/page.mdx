@@ -1,0 +1,376 @@
+# TypeScript Types
+
+<div className="mb-12 sm:mb-16">
+  <div className="text-lg text-zinc-600 dark:text-zinc-400 max-w-3xl mx-auto">
+    Full TypeScript type definitions for API responses. These examples mirror the
+    shapes currently returned by the REST endpoints.
+  </div>
+</div>
+
+## Installation
+
+<Card className="mb-12 sm:mb-24">
+  <CardContent className="pt-6">
+    <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+      Response types live in the repository under{" "}
+      <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs dark:bg-zinc-900">
+        src/lib/types/responses/
+      </code>
+      .
+    </p>
+    ```bash
+    # Clone the repository to access response types
+    git clone https://github.com/maiano/sw-next-api.git
+
+    # Response types are located in src/lib/types/responses/
+    ```
+  </CardContent>
+</Card>
+
+## Base Types
+
+### EntityId
+
+API responses expose `entityId` as a numeric identifier.
+
+```typescript
+type EntityId = number;
+```
+
+### Minimal Relationship Types
+
+Related entities use minimal projections by default.
+
+```typescript
+type PersonMinimal = {
+  entityId: number;
+  id: string;
+  name: string;
+};
+
+type FilmMinimal = {
+  entityId: number;
+  id: string;
+  title: string;
+  episode: number;
+};
+
+type PlanetMinimal = {
+  entityId: number;
+  id: string;
+  name: string;
+};
+
+type SpeciesMinimal = {
+  entityId: number;
+  id: string;
+  name: string;
+};
+
+type StarshipMinimal = {
+  entityId: number;
+  id: string;
+  name: string;
+};
+
+type VehicleMinimal = {
+  entityId: number;
+  id: string;
+  name: string;
+};
+```
+
+## Person Types
+
+### `PersonResponse`
+
+```typescript
+interface PersonResponse {
+  entityId: number;
+  id: string;                  // Slug, e.g. "luke-skywalker"
+  name: string;
+  heightCm: number | null;
+  massKg: number | null;
+  birthYearBBY: number | null;
+  gender: string;
+  homeworld: PlanetMinimal | null;
+  films: FilmMinimal[];
+  species: SpeciesMinimal[];
+  vehicles: VehicleMinimal[];
+  starships: StarshipMinimal[];
+  meta: {
+    isForceUser: boolean;
+    isJedi: boolean;
+    isSith: boolean;
+    faction:
+      | "republic"
+      | "separatists"
+      | "empire"
+      | "rebels"
+      | "civilian"
+      | "unknown";
+  };
+}
+```
+
+## Film Types
+
+### `FilmResponse`
+
+```typescript
+interface FilmResponse {
+  entityId: number;
+  id: string;                  // Slug, e.g. "a-new-hope"
+  title: string;
+  episode: number;
+  opening_crawl: string;
+  director: string;
+  producers: string[];
+  release_date: string;        // YYYY-MM-DD
+  release_year: number;
+  characters: PersonMinimal[];
+  planets: PlanetMinimal[];
+  starships: StarshipMinimal[];
+  vehicles: VehicleMinimal[];
+  species: SpeciesMinimal[];
+}
+```
+
+## Planet Types
+
+### `PlanetResponse`
+
+```typescript
+interface PlanetResponse {
+  entityId: number;
+  id: string;                  // Slug, e.g. "tatooine"
+  name: string;
+  rotationPeriod: number | null;
+  orbitalPeriod: number | null;
+  diameter: number | null;
+  climate: string;
+  gravity: string;
+  terrain: string;
+  surfaceWater: number | null;
+  population: number | null;
+  residents: PersonMinimal[];
+  films: FilmMinimal[];
+}
+```
+
+## Species Types
+
+### `SpeciesResponse`
+
+```typescript
+interface SpeciesResponse {
+  entityId: number;
+  id: string;                  // Slug, e.g. "wookiee"
+  name: string;
+  classification: string;
+  designation: string;
+  averageHeight: number | null;
+  averageLifespan: number | null;
+  skinColors: string[];
+  hairColors: string[];
+  eyeColors: string[];
+  language: string;
+  homeworld: PlanetMinimal | null;
+  people: PersonMinimal[];
+  films: FilmMinimal[];
+}
+```
+
+## Starship Types
+
+### `StarshipResponse`
+
+```typescript
+interface StarshipResponse {
+  entityId: number;
+  id: string;                  // Slug, e.g. "x-wing"
+  name: string;
+  model: string;
+  manufacturer: string[];
+  class: string;
+  cost_credits: number | null;
+  length_m: number | null;
+  crew: { min: number; max: number } | number | null;
+  passengers: number | null;
+  cargo_capacity: number | null;
+  consumables_days: number | null;
+  hyperdrive_rating: number | null;
+  mglt: number | null;
+  films: FilmMinimal[];
+  meta: {
+    is_military: boolean;
+    faction:
+      | "republic"
+      | "separatists"
+      | "empire"
+      | "rebels"
+      | "civilian"
+      | "unknown";
+  };
+}
+```
+
+## Vehicle Types
+
+### `VehicleResponse`
+
+```typescript
+interface VehicleResponse {
+  entityId: number;
+  id: string;                  // Slug, e.g. "snowspeeder"
+  name: string;
+  model: string;
+  manufacturer: string;
+  cost: number | null;
+  length: number | null;
+  crew: number | null;
+  passengers: number | null;
+  maxSpeed: number | null;
+  cargoCapacity: number | null;
+  consumables: string;
+  vehicleClass: string;
+  pilots: PersonMinimal[];
+  films: FilmMinimal[];
+}
+```
+
+## Pagination Response
+
+```typescript
+interface PaginatedResponse<T> {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+  results: T[];
+}
+
+type PeoplePaginated = PaginatedResponse<PersonResponse>;
+type FilmsPaginated = PaginatedResponse<FilmResponse>;
+```
+
+## Usage Examples
+
+### Fetch with Types
+
+```typescript
+async function getPerson(id: string): Promise<PersonResponse> {
+  const response = await fetch(
+    `https://sw-next-api.vercel.app/api/v1/people/${id}`
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch person");
+  }
+
+  return response.json();
+}
+
+const luke = await getPerson("luke-skywalker");
+console.log(luke.name);
+console.log(luke.heightCm);
+console.log(luke.meta.isJedi);
+```
+
+### Paginated Fetch
+
+```typescript
+async function getPeople(
+  page: number = 1,
+  limit: number = 10
+): Promise<PaginatedResponse<PersonResponse>> {
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+
+  const response = await fetch(
+    `https://sw-next-api.vercel.app/api/v1/people?${params}`
+  );
+
+  return response.json();
+}
+
+const { results, total, pages } = await getPeople(1, 20);
+console.log(`Showing ${results.length} of ${total} people across ${pages} pages`);
+```
+
+### Working with `expand`
+
+By default, related entities use minimal projections. When you request
+`expand`, the response shape becomes richer for those specific fields.
+
+```typescript
+type ExpandedPersonResponse = Omit<PersonResponse, "homeworld" | "films"> & {
+  homeworld: PlanetResponse | null;
+  films: FilmResponse[];
+};
+
+async function getPersonExpanded(id: string): Promise<ExpandedPersonResponse> {
+  const response = await fetch(
+    `https://sw-next-api.vercel.app/api/v1/people/${id}?expand=homeworld,films`
+  );
+
+  return response.json();
+}
+
+const luke = await getPersonExpanded("luke-skywalker");
+console.log(luke.homeworld?.climate);
+console.log(luke.films[0]?.director);
+```
+
+## Type Guards
+
+Useful type guards for runtime checks:
+
+```typescript
+function isPersonResponse(entity: unknown): entity is PersonResponse {
+  return (
+    typeof entity === "object" &&
+    entity !== null &&
+    "entityId" in entity &&
+    "id" in entity &&
+    "name" in entity &&
+    "meta" in entity
+  );
+}
+
+function isMinimalPerson(entity: unknown): entity is PersonMinimal {
+  return (
+    typeof entity === "object" &&
+    entity !== null &&
+    "entityId" in entity &&
+    "id" in entity &&
+    "name" in entity &&
+    Object.keys(entity).length === 3
+  );
+}
+```
+
+## Download Types
+
+<Card className="border-blue-200 bg-blue-50/50 dark:border-blue-900 dark:bg-blue-950/20">
+  <CardContent className="pt-6">
+    <div className="flex items-start gap-3">
+      <Badge variant="info">Repository</Badge>
+      <div className="flex-1">
+        <p className="text-sm text-zinc-700 dark:text-zinc-300 mb-3">
+          All TypeScript response types are available in the GitHub repository:
+        </p>
+        <a
+          href="https://github.com/maiano/sw-next-api/tree/main/src/lib/types/responses"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
+        >
+          View on GitHub →
+        </a>
+      </div>
+    </div>
+  </CardContent>
+</Card>
